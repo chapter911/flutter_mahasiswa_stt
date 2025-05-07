@@ -4,21 +4,20 @@ import 'package:flutter_easyloading/flutter_easyloading.dart';
 import 'package:get/get.dart' as g;
 
 class Api {
-  String? status, message;
-  List<dynamic>? data;
+  var id, quote, author;
 
-  Api({this.status, this.message, this.data});
+  Api({this.id, this.quote, this.author});
 
   factory Api.result(dynamic object) {
     return Api(
-      status: object['status'],
-      message: object['message'],
-      data: object['data'],
+      id: object['id'],
+      quote: object['quote'],
+      author: object['author'],
     );
   }
 
   static Future<Api?> getData(BuildContext context) async {
-    String apiUrl = "https://api.quotable.io/random";
+    String apiUrl = "https://dummyjson.com/quotes/random";
 
     EasyLoading.show(status: 'Mohon Tunggu');
 
@@ -40,62 +39,28 @@ class Api {
         dynamic listData = response.data;
 
         apiResponse = Api.result(listData);
+        EasyLoading.dismiss();
+        return apiResponse;
       } else {
-        dynamic listData = {
-          "status": "failed",
-          "message": "Koneksi Bermasalah",
-          "data": null,
-        };
-
-        apiResponse = Api.result(listData);
-      }
-      if (apiResponse.status != "success") {
         g.Get.snackbar(
-          apiResponse.status!,
-          apiResponse.message!,
+          "Gagal",
+          "Gagal Mengambil Data",
+          backgroundColor: Colors.red[800],
           colorText: Colors.white,
-          backgroundColor: Colors.red[900],
         );
       }
       EasyLoading.dismiss();
-      return apiResponse;
+      return null;
     } catch (e) {
-      if (context.mounted) {
-        showDialog(
-          context: context,
-          builder:
-              (context) => AlertDialog(
-                title: const Center(child: Text("Terdapat Error")),
-                content: Text(e.toString()),
-                actions: [
-                  ElevatedButton(
-                    onPressed: () {
-                      g.Get.back();
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.red[900],
-                    ),
-                    child: const Text(
-                      "Tutup",
-                      style: TextStyle(color: Colors.white),
-                    ),
-                  ),
-                ],
-                actionsAlignment: MainAxisAlignment.center,
-              ),
-        );
-      }
-
-      dynamic listData = {
-        "status": "failed",
-        "message": "Error ${e.toString()}",
-        "data": null,
-      };
-
-      Api data = Api.result(listData);
-
+      print(e);
+      g.Get.snackbar(
+        "Gagal",
+        "Gagal Mengambil Data",
+        backgroundColor: Colors.red[800],
+        colorText: Colors.white,
+      );
       EasyLoading.dismiss();
-      return data;
+      return null;
     }
   }
 }

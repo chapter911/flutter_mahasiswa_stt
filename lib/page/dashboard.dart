@@ -14,7 +14,8 @@ class Dashboard extends StatefulWidget {
 class _DashboardState extends State<Dashboard> {
   List<Widget> mahasiswaList = [];
   var quotes =
-      "Jangan pernah menyerah pada impianmu, karena impian adalah kunci kesuksesan.";
+          "Jangan pernah menyerah pada impianmu, karena impian adalah kunci kesuksesan.",
+      author = "Unknown";
 
   @override
   void initState() {
@@ -32,6 +33,7 @@ class _DashboardState extends State<Dashboard> {
           IconButton(
             onPressed: () {
               getListMahasiswa();
+              getQuotes();
             },
             icon: Icon(Icons.refresh),
           ),
@@ -51,7 +53,7 @@ class _DashboardState extends State<Dashboard> {
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
-                "Quotes :\n\"$quotes\"",
+                "Quotes :\n\"$quotes\" \n- $author",
                 style: TextStyle(color: Colors.white, fontSize: 20),
               ),
             ),
@@ -136,5 +138,20 @@ class _DashboardState extends State<Dashboard> {
     setState(() {});
   }
 
-  void getQuotes() {}
+  void getQuotes() {
+    Api.getData(context).then((value) {
+      print(value);
+      if (value != null) {
+        setState(() {
+          quotes = value.quote!;
+          author = value.author!;
+        });
+      } else {
+        setState(() {
+          quotes = "Gagal Mengambil Data";
+          author = "Unknown";
+        });
+      }
+    });
+  }
 }

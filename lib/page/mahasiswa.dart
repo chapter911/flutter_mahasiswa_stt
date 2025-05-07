@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:mahasiswa_stt/helper/database_helper.dart';
+import 'package:mahasiswa_stt/page/dashboard.dart';
 
 class Mahasiswa extends StatefulWidget {
   const Mahasiswa({super.key});
@@ -40,7 +41,7 @@ class _MahasiswaState extends State<Mahasiswa> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Input Mahasiswa"),
+        title: Text(isEdit ? "Detail Mahasiswa" : "Input Mahasiswa"),
         actions: [
           Visibility(
             visible: isEdit,
@@ -50,8 +51,12 @@ class _MahasiswaState extends State<Mahasiswa> {
                   title: "Hapus Semua Data",
                   middleText: "Apakah Anda yakin ingin menghapus semua data?",
                   onConfirm: () {
-                    DataBaseHelper.deleteAll('mahasiswa');
-                    Get.back();
+                    DataBaseHelper.deleteWhere(
+                      'mahasiswa',
+                      'nim=?',
+                      int.parse(nimController.text),
+                    );
+                    Get.offAll(() => Dashboard());
                   },
                   onCancel: () {
                     Get.closeAllSnackbars();
@@ -167,19 +172,43 @@ class _MahasiswaState extends State<Mahasiswa> {
                 if (isEdit) {
                   DataBaseHelper.deleteWhere(
                     'mahasiswa',
-                    'nim',
+                    'nim=?',
                     int.parse(nimController.text),
                   );
+                  DataBaseHelper.insert('mahasiswa', {
+                    'nim': int.parse(nimController.text),
+                    'nama': nameController.text,
+                    'tugas': double.parse(tugasController.text),
+                    'uts': double.parse(utsController.text),
+                    'uas': double.parse(uasController.text),
+                    'nilai_akhir': _nilaiAkhir,
+                  });
+                  Get.offAll(() => Dashboard());
+                } else {
+                  DataBaseHelper.getWhere(
+                    "mahasiswa",
+                    "nim=${nimController.text}",
+                  ).then((value) {
+                    if (value.isNotEmpty) {
+                      Get.snackbar(
+                        "Error",
+                        "NIM sudah terdaftar",
+                        backgroundColor: Colors.red[900],
+                        colorText: Colors.white,
+                      );
+                    } else {
+                      DataBaseHelper.insert('mahasiswa', {
+                        'nim': int.parse(nimController.text),
+                        'nama': nameController.text,
+                        'tugas': double.parse(tugasController.text),
+                        'uts': double.parse(utsController.text),
+                        'uas': double.parse(uasController.text),
+                        'nilai_akhir': _nilaiAkhir,
+                      });
+                      Get.offAll(() => Dashboard());
+                    }
+                  });
                 }
-                DataBaseHelper.insert('mahasiswa', {
-                  'nim': int.parse(nimController.text),
-                  'nama': nameController.text,
-                  'tugas': double.parse(tugasController.text),
-                  'uts': double.parse(utsController.text),
-                  'uas': double.parse(uasController.text),
-                  'nilai_akhir': _nilaiAkhir,
-                });
-                Get.back();
               },
               onCancel: () {
                 Get.closeAllSnackbars();

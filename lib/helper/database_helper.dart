@@ -24,6 +24,7 @@ class DataBaseHelper {
     try {
       await db.delete(table, where: where, whereArgs: [val]);
     } catch (e) {
+      print(e);
       Get.snackbar(
         "Maaf",
         "Gagal Menghapus Data",
